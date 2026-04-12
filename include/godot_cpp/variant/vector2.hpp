@@ -46,6 +46,15 @@ struct [[nodiscard]] Vector2 {
 		AXIS_Y,
 	};
 
+	/// Same values as Godot’s [Vector2](https://docs.godotengine.org/en/stable/classes/class_vector2.html#constants).
+	static const Vector2 ZERO;
+	static const Vector2 ONE;
+	static const Vector2 INF;
+	static const Vector2 LEFT;
+	static const Vector2 RIGHT;
+	static const Vector2 UP;
+	static const Vector2 DOWN;
+
 	union {
 		struct {
 			union {
