@@ -2,7 +2,6 @@
 
 import json
 import re
-import shutil
 from pathlib import Path
 
 from make_interface_header import generate_gdextension_interface_header
@@ -302,7 +301,19 @@ def _generate_bindings(
 
     target_dir = Path(output_dir) / "gen"
 
-    shutil.rmtree(target_dir, ignore_errors=True)
+    # Wipe previous generated sources/headers, but keep compiler artifacts (.obj / .o / .pdb).
+    # Objects are written next to gen sources; a full rmtree forced a full godot-cpp recompile
+    # every time bindings regenerated (including spurious rebuilds).
+    _GENERATED_SUFFIXES = {".h", ".hpp", ".hh", ".inc", ".cpp", ".cc", ".c", ".cxx"}
+    if target_dir.exists():
+        for path in sorted(target_dir.rglob("*"), reverse=True):
+            if path.is_file() and path.suffix.lower() in _GENERATED_SUFFIXES:
+                path.unlink(missing_ok=True)
+            elif path.is_dir():
+                try:
+                    path.rmdir()  # only removes empty dirs; leaves dirs that still hold .obj
+                except OSError:
+                    pass
     target_dir.mkdir(parents=True, exist_ok=True)
 
     real_t = "double" if precision == "double" else "float"

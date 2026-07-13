@@ -150,9 +150,10 @@ def scons_emit_files(target, source, env):
         files.append(file)
     env["godot_cpp_gen_dir"] = target[0].abspath
 
-    # gdextension_interface.h shouldn't depend on extension_api.json or the build_profile.json.
-    gdextension_interface_header = os.path.join(str(target[0]), "gen", "include", "gdextension_interface.h")
-    env.Ignore(gdextension_interface_header, [source[0], profile_filepath])
+    # Do NOT env.Ignore() gdextension_interface.h against extension_api.json / build_profile.
+    # GodotCPPBindings is one multi-target action with 4 sources; Ignore drops deps on a single
+    # output and corrupts sconsign ("3 ids but 4 sigs"), so that header looks forever stale.
+    # The shared generator already rewrites every gen file whenever any target is rebuilt.
 
     return files, source
 
